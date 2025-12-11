@@ -32,6 +32,9 @@
           ChevronRight: ({ size = 24, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>
           ),
+          ChevronLeft: ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m15 18-6-6 6-6"/></svg>
+          ),
           Disc: ({ size = 24, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
           ),
@@ -49,7 +52,7 @@
           )
         };
 
-        const { ChevronRight, Disc, Music, Play, X, Loader2 } = Icons;
+        const { ChevronRight, ChevronLeft, Disc, Music, Play, X, Loader2 } = Icons;
 
         // --- ヘルパー関数 ---
         const getYouTubeId = (url) => {
@@ -79,7 +82,7 @@
             text: "WHERE WORDS FAIL, MUSIC SPEAKS.",
             author: "Hans Christian Andersen"
           },
-          presenters: [] // モックデータ省略（実際のデータ構造は前述の通り）
+          presenters: [] 
         };
 
         const YouTubeModal = ({ videoId, onClose }) => {
@@ -110,9 +113,19 @@
           return <div className={`transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>{children}</div>;
         };
 
-        const NextButton = ({ onClick, label = "NEXT", colorClass = "text-white" }) => (
-          <div className={`fixed bottom-8 right-8 z-50 ${colorClass}`}>
-            <button onClick={onClick} className="flex items-center gap-2 hover:opacity-50 transition-opacity"><span className="text-sm tracking-widest">{label}</span> <ChevronRight size={20} /></button>
+        // ★更新箇所★ 戻るボタンを追加したナビゲーション
+        const Navigation = ({ onNext, onPrev, nextLabel = "NEXT", showPrev = true, colorClass = "text-white" }) => (
+          <div className={`fixed bottom-8 right-8 z-50 ${colorClass} flex items-center gap-8`}>
+            {showPrev && (
+              <button onClick={onPrev} className="flex items-center gap-2 hover:opacity-50 transition-opacity group">
+                <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                <span className="text-sm tracking-widest">BACK</span> 
+              </button>
+            )}
+            <button onClick={onNext} className="flex items-center gap-2 hover:opacity-50 transition-opacity group">
+              <span className="text-sm tracking-widest">{nextLabel}</span> 
+              <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         );
 
@@ -149,6 +162,7 @@
           }, []);
 
           const nextSlide = () => setCurrentSlide(prev => Math.min(prev + 1, totalSlides - 1));
+          const prevSlide = () => setCurrentSlide(prev => Math.max(0, prev - 1));
           
           const handlePlay = (url) => {
              const id = getYouTubeId(url);
@@ -166,7 +180,7 @@
                  <FadeIn delay={600}><h1 className="text-4xl md:text-7xl font-black mb-6">THE LOVELY MUSIC<br/>IDIOTS' AWARDS</h1></FadeIn>
                  <FadeIn delay={1200}><p className="text-lg tracking-widest text-gray-300">A SONIC RETROSPECTIVE: 2025</p></FadeIn>
               </div>
-              <NextButton onClick={nextSlide} label="START" />
+              <Navigation onNext={nextSlide} onPrev={prevSlide} showPrev={false} nextLabel="START" />
             </SlideContainer>
           );
           
@@ -176,7 +190,7 @@
                    <FadeIn delay={100}><div className="text-sm font-bold tracking-widest mb-12 border-b border-black pb-2 inline-block">01. INTRODUCTION</div></FadeIn>
                    {appData.introText.map((t, i) => <FadeIn key={i} delay={300+i*200}><p className="text-2xl font-serif">{t}</p></FadeIn>)}
                 </div>
-                <NextButton onClick={nextSlide} colorClass="text-black" />
+                <Navigation onNext={nextSlide} onPrev={prevSlide} colorClass="text-black" />
              </SlideContainer>
           );
 
@@ -193,7 +207,7 @@
                     </FadeIn>
                  ))}
                </div>
-               <NextButton onClick={nextSlide} colorClass="text-black" />
+               <Navigation onNext={nextSlide} onPrev={prevSlide} colorClass="text-black" />
             </SlideContainer>
           );
 
@@ -223,7 +237,7 @@
                       </FadeIn>
                    </div>
                 </div>
-                <NextButton onClick={nextSlide} colorClass="mix-blend-difference text-white" />
+                <Navigation onNext={nextSlide} onPrev={prevSlide} colorClass="mix-blend-difference text-white" />
              </SlideContainer>
           );
 
@@ -231,7 +245,7 @@
              <SlideContainer className="bg-zinc-900 text-white text-center">
                 <FadeIn delay={500}><blockquote className="text-3xl md:text-5xl font-serif italic mb-8">“{appData.interludeQuote.text}”</blockquote></FadeIn>
                 <FadeIn delay={1000}><cite className="text-sm tracking-widest text-gray-400">— {appData.interludeQuote.author}</cite></FadeIn>
-                <NextButton onClick={nextSlide} label="PROCEED" />
+                <Navigation onNext={nextSlide} onPrev={prevSlide} label="PROCEED" />
              </SlideContainer>
           );
 
@@ -239,7 +253,7 @@
              <SlideContainer className="bg-black text-white text-center">
                 <FadeIn delay={500}><h2 className="text-5xl md:text-8xl font-black mb-4">THE NO.1 PICKS</h2></FadeIn>
                 <FadeIn delay={800}><p className="text-gray-400 tracking-widest">THE DEFINING SOUNDS OF 2025</p></FadeIn>
-                <NextButton onClick={nextSlide} label="START" />
+                <Navigation onNext={nextSlide} onPrev={prevSlide} label="START" />
              </SlideContainer>
           );
 
@@ -257,11 +271,10 @@
                    </FadeIn>
                    <FadeIn delay={1200}><p className="text-gray-500 font-serif italic">"{p.ranks[1]?.comment}"</p></FadeIn>
                 </div>
-                <NextButton onClick={nextSlide} />
+                <Navigation onNext={nextSlide} onPrev={prevSlide} />
              </SlideContainer>
           );
 
-          // ★更新箇所★ サムネイル付きアーカイブ
           const Archive = () => (
              <SlideContainer className="bg-neutral-900 text-white">
                 <div className="w-full max-w-6xl z-10">
@@ -269,9 +282,7 @@
                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {appData.presenters.map(p => Object.values(p.ranks).map((r, i) => {
                          const videoId = getYouTubeId(r.youtubeUrl);
-                         // サムネイルURLを生成 (hqdefaultは高画質)
                          const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
-
                          return (
                              <div key={`${p.id}-${i}`} onClick={() => handlePlay(r.youtubeUrl)} className="aspect-square bg-gray-800 relative group cursor-pointer border border-gray-700 flex items-center justify-center overflow-hidden">
                                 {thumbnailUrl && (
@@ -287,7 +298,10 @@
                          );
                       }))}
                    </div>
-                   <div className="mt-24 text-center"><button onClick={() => setCurrentSlide(0)} className="border border-white/30 px-8 py-3 hover:bg-white hover:text-black transition-colors uppercase tracking-widest">REPLAY</button></div>
+                   <div className="mt-24 text-center flex justify-center gap-4">
+                      <button onClick={prevSlide} className="border border-white/30 px-8 py-3 hover:bg-white hover:text-black transition-colors uppercase tracking-widest">BACK</button>
+                      <button onClick={() => setCurrentSlide(0)} className="border border-white/30 px-8 py-3 hover:bg-white hover:text-black transition-colors uppercase tracking-widest">REPLAY</button>
+                   </div>
                 </div>
              </SlideContainer>
           );
