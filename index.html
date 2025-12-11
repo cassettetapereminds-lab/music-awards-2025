@@ -23,12 +23,11 @@
 
     <script type="text/babel">
         // ★重要★ ここにあなたのGASアプリのURLを貼り付けてください
-        // URLが空、または間違っていても、下のMOCK_DATAを使ってサイトは表示されます。
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyo0ywsxhTU5Bx4-rkSkc1JjrqJanQ8nRX785UvY-n5RVHCiYoE9X3jMuReDlcGGJlA/exec"; 
+        const GAS_API_URL = "https://script.google.com/macros/s/xxxxxxxxxxxxxxxxx/exec"; 
 
         const { useState, useEffect } = React;
 
-        // --- アイコンコンポーネント定義 (Lucide依存を排除) ---
+        // --- アイコンコンポーネント定義 ---
         const Icons = {
           ChevronRight: ({ size = 24, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>
@@ -52,9 +51,15 @@
 
         const { ChevronRight, Disc, Music, Play, X, Loader2 } = Icons;
 
+        // --- ヘルパー関数 ---
+        const getYouTubeId = (url) => {
+             if (!url) return null;
+             const match = url.match(/.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/);
+             return (match && match[1].length === 11) ? match[1] : null;
+        };
+
         // --- 以下、アプリのロジック ---
 
-        // 安全策としてのサンプルデータ（日本語）
         const MOCK_DATA = {
           eventTitle: "THE LOVELY MUSIC IDIOTS' AWARDS",
           subTitle: "A SONIC RETROSPECTIVE: 2025",
@@ -74,41 +79,7 @@
             text: "WHERE WORDS FAIL, MUSIC SPEAKS.",
             author: "Hans Christian Andersen"
           },
-          presenters: [
-            {
-              id: 1,
-              name: "いっせい",
-              nameEn: "ISSEI",
-              themeColor: "bg-gray-800",
-              ranks: {
-                3: { song: "Midnight City", artist: "M83", comment: "夜のドライブに最適な一曲。", youtubeUrl: "https://www.youtube.com/watch?v=dX3k_QDnzHE" },
-                2: { song: "The 1975", artist: "The 1975", comment: "イントロの瞬間から世界が変わる。", youtubeUrl: "https://www.youtube.com/watch?v=FfBKqaVk2Co" },
-                1: { song: "A Sky Full of Stars", artist: "Coldplay", comment: "2025年、最も心を震わせたアンセム。", youtubeUrl: "https://www.youtube.com/watch?v=VPRjCeoBqrI" }
-              }
-            },
-            {
-              id: 2,
-              name: "なおと",
-              nameEn: "NAOTO",
-              themeColor: "bg-zinc-800",
-              ranks: {
-                3: { song: "Vampire", artist: "Olivia Rodrigo", comment: "圧倒的な表現力に脱帽。", youtubeUrl: "https://www.youtube.com/watch?v=RlPNh_9IK0M" },
-                2: { song: "Ditto", artist: "NewJeans", comment: "冬の空気に溶け込むようなビート。", youtubeUrl: "https://www.youtube.com/watch?v=pSUydWEqKwE" },
-                1: { song: "Idol", artist: "YOASOBI", comment: "時代の象徴。構成が天才的。", youtubeUrl: "https://www.youtube.com/watch?v=ZRtdQ81jPUQ" }
-              }
-            },
-            {
-              id: 3,
-              name: "ごう",
-              nameEn: "GO",
-              themeColor: "bg-stone-800",
-              ranks: {
-                3: { song: "Bling-Bang-Bang-Born", artist: "Creepy Nuts", comment: "一度聴いたら頭から離れない。", youtubeUrl: "https://www.youtube.com/watch?v=mLW35ymz6NM" },
-                2: { song: "Apartment", artist: "Bruno Mars", comment: "グルーヴ感が最高に心地よい。", youtubeUrl: "" }, 
-                1: { song: "Die With A Smile", artist: "Lady Gaga & Bruno Mars", comment: "二人の歌声が奇跡のような調和。", youtubeUrl: "https://www.youtube.com/watch?v=kPa7bsKwL-c" }
-              }
-            }
-          ]
+          presenters: [] // モックデータ省略（実際のデータ構造は前述の通り）
         };
 
         const YouTubeModal = ({ videoId, onClose }) => {
@@ -153,31 +124,26 @@
           const totalSlides = 12;
 
           useEffect(() => {
-            // URLがデフォルトのまま、または空の場合は即座にモックデータを使用
             if (!GAS_API_URL || GAS_API_URL.includes("xxxx")) {
-                console.log("Using Mock Data (No valid API URL provided)");
+                console.log("Using Mock Data");
                 setAppData(MOCK_DATA);
                 setLoading(false);
                 return;
             }
 
             fetch(GAS_API_URL)
-              .then(res => {
-                  if (!res.ok) throw new Error("Network response was not ok");
-                  return res.json();
-              })
+              .then(res => res.ok ? res.json() : Promise.reject("Network response was not ok"))
               .then(data => { 
                   if(data && data.presenters && data.presenters.length > 0) {
                       setAppData(data); 
                   } else {
-                      console.warn("Invalid data received from API, using Mock Data");
                       setAppData(MOCK_DATA);
                   }
                   setLoading(false); 
               })
               .catch(err => { 
-                  console.error("Fetch error, using Mock Data:", err); 
-                  setAppData(MOCK_DATA); // エラー時はモックデータを使用
+                  console.error(err); 
+                  setAppData(MOCK_DATA);
                   setLoading(false); 
               });
           }, []);
@@ -185,14 +151,11 @@
           const nextSlide = () => setCurrentSlide(prev => Math.min(prev + 1, totalSlides - 1));
           
           const handlePlay = (url) => {
-             if (!url) return;
-             const match = url.match(/.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/);
-             if (match && match[1].length === 11) setPlayingVideoId(match[1]);
+             const id = getYouTubeId(url);
+             if (id) setPlayingVideoId(id);
           };
 
           if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white"><Loader2 className="animate-spin" size={48} /></div>;
-          
-          // 万が一 appData が null の場合（通常ありえないが念のため）
           if (!appData) return <div className="min-h-screen bg-black flex items-center justify-center text-white"><div>Data Load Failed.</div></div>;
 
           // Slide Components
@@ -298,21 +261,31 @@
              </SlideContainer>
           );
 
+          // ★更新箇所★ サムネイル付きアーカイブ
           const Archive = () => (
              <SlideContainer className="bg-neutral-900 text-white">
                 <div className="w-full max-w-6xl z-10">
                    <div className="flex justify-between items-end mb-12 border-b border-gray-700 pb-4"><h2 className="text-3xl font-bold">05. ARCHIVE</h2></div>
                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {appData.presenters.map(p => Object.values(p.ranks).map((r, i) => (
-                         <div key={`${p.id}-${i}`} onClick={() => handlePlay(r.youtubeUrl)} className="aspect-square bg-gray-800 relative group cursor-pointer border border-gray-700 flex items-center justify-center overflow-hidden">
-                            <Play size={48} className="opacity-50 group-hover:opacity-100 text-white z-10" fill="currentColor" />
-                            <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 text-center transition-opacity z-20">
-                               <span className="text-xs text-gray-400 mb-1">SELECTED BY {p.nameEn}</span>
-                               <p className="font-bold text-lg mb-1">{r.song}</p>
-                               <p className="text-sm text-gray-300">{r.artist}</p>
-                            </div>
-                         </div>
-                      )))}
+                      {appData.presenters.map(p => Object.values(p.ranks).map((r, i) => {
+                         const videoId = getYouTubeId(r.youtubeUrl);
+                         // サムネイルURLを生成 (hqdefaultは高画質)
+                         const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+
+                         return (
+                             <div key={`${p.id}-${i}`} onClick={() => handlePlay(r.youtubeUrl)} className="aspect-square bg-gray-800 relative group cursor-pointer border border-gray-700 flex items-center justify-center overflow-hidden">
+                                {thumbnailUrl && (
+                                    <img src={thumbnailUrl} alt={r.song} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-300" />
+                                )}
+                                <Play size={48} className="opacity-80 group-hover:opacity-100 text-white z-10 drop-shadow-md" fill="currentColor" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 text-center transition-opacity z-20">
+                                   <span className="text-xs text-gray-300 mb-1">SELECTED BY {p.nameEn}</span>
+                                   <p className="font-bold text-lg mb-1">{r.song}</p>
+                                   <p className="text-sm text-gray-300">{r.artist}</p>
+                                </div>
+                             </div>
+                         );
+                      }))}
                    </div>
                    <div className="mt-24 text-center"><button onClick={() => setCurrentSlide(0)} className="border border-white/30 px-8 py-3 hover:bg-white hover:text-black transition-colors uppercase tracking-widest">REPLAY</button></div>
                 </div>
