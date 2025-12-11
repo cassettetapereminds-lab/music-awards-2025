@@ -25,6 +25,12 @@
         // ★重要★ ここにあなたのGASアプリのURLを貼り付けてください
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyo0ywsxhTU5Bx4-rkSkc1JjrqJanQ8nRX785UvY-n5RVHCiYoE9X3jMuReDlcGGJlA/exec"; 
 
+        // ★公開設定 (ネタバレ防止)★
+        // false: 情報を隠す（モザイク表示・クリック無効）
+        // true : 情報を公開（曲名表示・再生可能）
+        // 当日はここを true に書き換えてください。
+        const IS_REVEALED = false; 
+
         const { useState, useEffect } = React;
 
         // --- アイコンコンポーネント定義 ---
@@ -49,10 +55,13 @@
           ),
           Loader2: ({ size = 24, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          ),
+          Lock: ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           )
         };
 
-        const { ChevronRight, ChevronLeft, Disc, Music, Play, X, Loader2 } = Icons;
+        const { ChevronRight, ChevronLeft, Disc, Music, Play, X, Loader2, Lock } = Icons;
 
         // --- ヘルパー関数 ---
         const getYouTubeId = (url) => {
@@ -113,7 +122,6 @@
           return <div className={`transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>{children}</div>;
         };
 
-        // ★更新箇所★ 戻るボタンを追加したナビゲーション
         const Navigation = ({ onNext, onPrev, nextLabel = "NEXT", showPrev = true, colorClass = "text-white" }) => (
           <div className={`fixed bottom-8 right-8 z-50 ${colorClass} flex items-center gap-8`}>
             {showPrev && (
@@ -128,6 +136,19 @@
             </button>
           </div>
         );
+
+        // コンテンツを隠すためのラッパーコンポーネント
+        const RevealGuard = ({ children, placeholder = "COMING SOON" }) => {
+           if (IS_REVEALED) return children;
+           return (
+               <div className="relative w-full h-full flex items-center justify-center bg-black/40 backdrop-blur-md rounded border border-white/10 p-4 min-h-[100px]">
+                   <div className="flex flex-col items-center text-white/50 gap-2">
+                       <Lock size={24} />
+                       <span className="text-sm font-bold tracking-[0.2em]">{placeholder}</span>
+                   </div>
+               </div>
+           );
+        };
 
         function App() {
           const [currentSlide, setCurrentSlide] = useState(0);
@@ -165,6 +186,8 @@
           const prevSlide = () => setCurrentSlide(prev => Math.max(0, prev - 1));
           
           const handlePlay = (url) => {
+             // 公開前はクリック無効
+             if (!IS_REVEALED) return;
              const id = getYouTubeId(url);
              if (id) setPlayingVideoId(id);
           };
@@ -220,19 +243,23 @@
                    </div>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                       <FadeIn delay={600}>
-                         <div onClick={() => handlePlay(p.ranks[3]?.youtubeUrl)} className="bg-white/10 p-8 border border-white/20 cursor-pointer hover:bg-white/20 transition-colors relative group">
-                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"><Play size={24} fill="white" /></div>
+                         <div onClick={() => handlePlay(p.ranks[3]?.youtubeUrl)} className={`bg-white/10 p-8 border border-white/20 transition-colors relative group ${IS_REVEALED ? 'cursor-pointer hover:bg-white/20' : ''}`}>
                             <div className="flex justify-between mb-6"><span className="text-5xl font-black text-white/20">03</span><span className="text-xs border border-white/40 px-2 py-1 h-fit rounded">BRONZE</span></div>
-                            <h3 className="text-2xl font-bold mb-2">{p.ranks[3]?.song}</h3><p className="text-white/70">{p.ranks[3]?.artist}</p>
-                            <div className="mt-6 pt-4 border-t border-white/10 text-sm italic">"{p.ranks[3]?.comment}"</div>
+                            <RevealGuard>
+                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"><Play size={24} fill="white" /></div>
+                                <h3 className="text-2xl font-bold mb-2">{p.ranks[3]?.song}</h3><p className="text-white/70">{p.ranks[3]?.artist}</p>
+                                <div className="mt-6 pt-4 border-t border-white/10 text-sm italic">"{p.ranks[3]?.comment}"</div>
+                            </RevealGuard>
                          </div>
                       </FadeIn>
                       <FadeIn delay={900}>
-                         <div onClick={() => handlePlay(p.ranks[2]?.youtubeUrl)} className="bg-white text-black p-8 shadow-2xl transform md:translate-y-8 cursor-pointer hover:bg-gray-100 transition-colors relative group">
-                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"><Play size={24} fill="black" /></div>
+                         <div onClick={() => handlePlay(p.ranks[2]?.youtubeUrl)} className={`bg-white text-black p-8 shadow-2xl transform md:translate-y-8 transition-colors relative group ${IS_REVEALED ? 'cursor-pointer hover:bg-gray-100' : ''}`}>
                             <div className="flex justify-between mb-6"><span className="text-5xl font-black text-gray-200">02</span><span className="text-xs border border-black px-2 py-1 h-fit rounded">SILVER</span></div>
-                            <h3 className="text-2xl font-bold mb-2">{p.ranks[2]?.song}</h3><p className="text-gray-600">{p.ranks[2]?.artist}</p>
-                            <div className="mt-6 pt-4 border-t border-gray-200 text-sm italic">"{p.ranks[2]?.comment}"</div>
+                            <RevealGuard>
+                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"><Play size={24} fill="black" /></div>
+                                <h3 className="text-2xl font-bold mb-2">{p.ranks[2]?.song}</h3><p className="text-gray-600">{p.ranks[2]?.artist}</p>
+                                <div className="mt-6 pt-4 border-t border-gray-200 text-sm italic">"{p.ranks[2]?.comment}"</div>
+                            </RevealGuard>
                          </div>
                       </FadeIn>
                    </div>
@@ -263,13 +290,19 @@
                 <div className="z-10 relative w-full max-w-2xl">
                    <FadeIn delay={200}><div className="mb-8"><span className="bg-white text-black px-4 py-1 text-xs font-bold uppercase tracking-widest">{p.nameEn}'S BEST SONG</span></div></FadeIn>
                    <FadeIn delay={600}>
-                      <div onClick={() => handlePlay(p.ranks[1]?.youtubeUrl)} className="border-4 border-white p-8 md:p-16 bg-black cursor-pointer hover:scale-105 transition-transform mb-8 relative group">
-                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 z-10"><Play size={64} fill="white" /></div>
-                         <h3 className="text-4xl md:text-6xl font-black mb-4">{p.ranks[1]?.song}</h3>
-                         <p className="text-xl md:text-2xl text-gray-300">{p.ranks[1]?.artist}</p>
+                      <div onClick={() => handlePlay(p.ranks[1]?.youtubeUrl)} className={`border-4 border-white p-8 md:p-16 bg-black transition-transform mb-8 relative group ${IS_REVEALED ? 'cursor-pointer hover:scale-105' : ''}`}>
+                         <RevealGuard placeholder="???">
+                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 z-10"><Play size={64} fill="white" /></div>
+                             <h3 className="text-4xl md:text-6xl font-black mb-4">{p.ranks[1]?.song}</h3>
+                             <p className="text-xl md:text-2xl text-gray-300">{p.ranks[1]?.artist}</p>
+                         </RevealGuard>
                       </div>
                    </FadeIn>
-                   <FadeIn delay={1200}><p className="text-gray-500 font-serif italic">"{p.ranks[1]?.comment}"</p></FadeIn>
+                   <FadeIn delay={1200}>
+                       <RevealGuard placeholder="">
+                           <p className="text-gray-500 font-serif italic">"{p.ranks[1]?.comment}"</p>
+                       </RevealGuard>
+                   </FadeIn>
                 </div>
                 <Navigation onNext={nextSlide} onPrev={prevSlide} />
              </SlideContainer>
@@ -284,16 +317,18 @@
                          const videoId = getYouTubeId(r.youtubeUrl);
                          const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
                          return (
-                             <div key={`${p.id}-${i}`} onClick={() => handlePlay(r.youtubeUrl)} className="aspect-square bg-gray-800 relative group cursor-pointer border border-gray-700 flex items-center justify-center overflow-hidden">
-                                {thumbnailUrl && (
-                                    <img src={thumbnailUrl} alt={r.song} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-300" />
-                                )}
-                                <Play size={48} className="opacity-80 group-hover:opacity-100 text-white z-10 drop-shadow-md" fill="currentColor" />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 text-center transition-opacity z-20">
-                                   <span className="text-xs text-gray-300 mb-1">SELECTED BY {p.nameEn}</span>
-                                   <p className="font-bold text-lg mb-1">{r.song}</p>
-                                   <p className="text-sm text-gray-300">{r.artist}</p>
-                                </div>
+                             <div key={`${p.id}-${i}`} onClick={() => handlePlay(r.youtubeUrl)} className={`aspect-square bg-gray-800 relative group border border-gray-700 flex items-center justify-center overflow-hidden ${IS_REVEALED ? 'cursor-pointer' : ''}`}>
+                                <RevealGuard placeholder="LOCKED">
+                                    {thumbnailUrl && (
+                                        <img src={thumbnailUrl} alt={r.song} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-300" />
+                                    )}
+                                    <Play size={48} className="opacity-80 group-hover:opacity-100 text-white z-10 drop-shadow-md" fill="currentColor" />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 text-center transition-opacity z-20">
+                                       <span className="text-xs text-gray-300 mb-1">SELECTED BY {p.nameEn}</span>
+                                       <p className="font-bold text-lg mb-1">{r.song}</p>
+                                       <p className="text-sm text-gray-300">{r.artist}</p>
+                                    </div>
+                                </RevealGuard>
                              </div>
                          );
                       }))}
