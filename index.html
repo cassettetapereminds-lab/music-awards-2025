@@ -94,8 +94,7 @@
             "我々は、ただの音楽好きではない。",
             "我々は、音の探求者であり、時代の証人である。",
             "今宵、三人の『愛すべき音楽馬鹿達』が、",
-            "自らの2025年を定義した音の軌跡をここに記す。",
-            "2025"
+            "自らの2025年を定義した音の軌跡をここに記す。"
           ],
           rules: [
             { title: "SELECTION", desc: "2025年に聴いた楽曲の中から、自身のベストソングトップ3を選出する。発表年は問わない。" },
@@ -230,7 +229,10 @@
              <SlideContainer className="bg-white text-black items-start md:items-center">
                 <div className="max-w-3xl space-y-8 z-10">
                    <FadeIn delay={100}><div className="text-sm font-bold tracking-widest mb-12 border-b border-black pb-2 inline-block">01. INTRODUCTION</div></FadeIn>
-                   {appData.introText && appData.introText.map((t, i) => <FadeIn key={i} delay={300+i*200}><p className="text-2xl font-serif">{t}</p></FadeIn>)}
+                   {appData.introText && appData.introText.map((t, i) => (
+                       // "2025"だけの行は除外するロジック（念のため）
+                       t === "2025" ? null : <FadeIn key={i} delay={300+i*200}><p className="text-2xl font-serif">{t}</p></FadeIn>
+                   ))}
                 </div>
                 <Navigation onNext={nextSlide} onPrev={prevSlide} colorClass="text-black" />
              </SlideContainer>
