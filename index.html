@@ -195,15 +195,4 @@
           // Slide Components
           const Opening = () => (
             <SlideContainer className="bg-black text-white text-center">
-              <div className="z-10 flex flex-col items-center border-4 border-white p-12 relative">
-                 <FadeIn delay={200}><div className="text-sm tracking-[0.3em] mb-4 text-gray-400">00. OPENING</div></FadeIn>
-                 <FadeIn delay={600}><h1 className="text-4xl md:text-7xl font-black mb-6">BEST MUSIC<br/>TOP3 2025</h1></FadeIn>
-                 <FadeIn delay={1200}><p className="text-lg tracking-widest text-gray-300">THE LOVELY MUSIC IDIOTS' AWARDS</p></FadeIn>
-              </div>
-              <Navigation onNext={nextSlide} onPrev={prevSlide} showPrev={false} nextLabel="START" />
-            </SlideContainer>
-          );
-          
-          const Manifesto = () => (
-             <SlideContainer className="bg-white text-black items-start md:items-center">
-                <div className="max-w-3xl space-y-8 z-1
+              <div className="z-10
