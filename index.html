@@ -28,7 +28,6 @@
         // ★公開設定 (ネタバレ防止)★
         // false: 情報を隠す（モザイク表示・クリック無効）
         // true : 情報を公開（曲名表示・再生可能）
-        // 当日はここを true に書き換えてください。
         const IS_REVEALED = false; 
 
         const { useState, useEffect } = React;
@@ -73,8 +72,8 @@
         // --- 以下、アプリのロジック ---
 
         const MOCK_DATA = {
-          eventTitle: "THE LOVELY MUSIC IDIOTS' AWARDS",
-          subTitle: "A SONIC RETROSPECTIVE: 2025",
+          eventTitle: "BEST MUSIC TOP3 2025",
+          subTitle: "THE LOVELY MUSIC IDIOTS' AWARDS",
           introText: [
             "我々は、ただの音楽好きではない。",
             "我々は、音の探求者であり、時代の証人である。",
@@ -137,7 +136,6 @@
           </div>
         );
 
-        // コンテンツを隠すためのラッパーコンポーネント
         const RevealGuard = ({ children, placeholder = "COMING SOON" }) => {
            if (IS_REVEALED) return children;
            return (
@@ -186,7 +184,6 @@
           const prevSlide = () => setCurrentSlide(prev => Math.max(0, prev - 1));
           
           const handlePlay = (url) => {
-             // 公開前はクリック無効
              if (!IS_REVEALED) return;
              const id = getYouTubeId(url);
              if (id) setPlayingVideoId(id);
@@ -200,8 +197,8 @@
             <SlideContainer className="bg-black text-white text-center">
               <div className="z-10 flex flex-col items-center border-4 border-white p-12 relative">
                  <FadeIn delay={200}><div className="text-sm tracking-[0.3em] mb-4 text-gray-400">00. OPENING</div></FadeIn>
-                 <FadeIn delay={600}><h1 className="text-4xl md:text-7xl font-black mb-6">THE LOVELY MUSIC<br/>IDIOTS' AWARDS</h1></FadeIn>
-                 <FadeIn delay={1200}><p className="text-lg tracking-widest text-gray-300">A SONIC RETROSPECTIVE: 2025</p></FadeIn>
+                 <FadeIn delay={600}><h1 className="text-4xl md:text-7xl font-black mb-6">BEST MUSIC<br/>TOP3 2025</h1></FadeIn>
+                 <FadeIn delay={1200}><p className="text-lg tracking-widest text-gray-300">THE LOVELY MUSIC IDIOTS' AWARDS</p></FadeIn>
               </div>
               <Navigation onNext={nextSlide} onPrev={prevSlide} showPrev={false} nextLabel="START" />
             </SlideContainer>
@@ -209,160 +206,4 @@
           
           const Manifesto = () => (
              <SlideContainer className="bg-white text-black items-start md:items-center">
-                <div className="max-w-3xl space-y-8 z-10">
-                   <FadeIn delay={100}><div className="text-sm font-bold tracking-widest mb-12 border-b border-black pb-2 inline-block">01. INTRODUCTION</div></FadeIn>
-                   {appData.introText.map((t, i) => <FadeIn key={i} delay={300+i*200}><p className="text-2xl font-serif">{t}</p></FadeIn>)}
-                </div>
-                <Navigation onNext={nextSlide} onPrev={prevSlide} colorClass="text-black" />
-             </SlideContainer>
-          );
-
-          const Rules = () => (
-            <SlideContainer className="bg-neutral-100 text-black">
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl z-10">
-                 {appData.rules.map((r, i) => (
-                    <FadeIn key={i} delay={i*300}>
-                       <div className="bg-white p-8 h-full shadow-lg border-t-4 border-black">
-                          <div className="text-4xl font-black text-gray-200 mb-4">0{i+1}</div>
-                          <h3 className="text-xl font-bold mb-4">{r.title}</h3>
-                          <p className="text-gray-600 font-serif">{r.desc}</p>
-                       </div>
-                    </FadeIn>
-                 ))}
-               </div>
-               <Navigation onNext={nextSlide} onPrev={prevSlide} colorClass="text-black" />
-            </SlideContainer>
-          );
-
-          const Reveal32 = ({ p }) => (
-             <SlideContainer className={`text-white relative overflow-hidden ${p.themeColor}`}>
-                <div className="z-10 w-full max-w-4xl relative">
-                   <div className="flex justify-between items-end border-b border-white/30 pb-4 mb-12">
-                      <div><FadeIn delay={100}><div className="text-xs tracking-[0.4em] mb-2">02. THE REVEAL</div><h2 className="text-6xl font-black uppercase">{p.nameEn}</h2></FadeIn></div>
-                      <div className="text-right"><FadeIn delay={300}><div className="text-sm text-white/60">PRESENTER</div><div className="text-xl">{p.name}</div></FadeIn></div>
-                   </div>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                      <FadeIn delay={600}>
-                         <div onClick={() => handlePlay(p.ranks[3]?.youtubeUrl)} className={`bg-white/10 p-8 border border-white/20 transition-colors relative group ${IS_REVEALED ? 'cursor-pointer hover:bg-white/20' : ''}`}>
-                            <div className="flex justify-between mb-6"><span className="text-5xl font-black text-white/20">03</span><span className="text-xs border border-white/40 px-2 py-1 h-fit rounded">BRONZE</span></div>
-                            <RevealGuard>
-                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"><Play size={24} fill="white" /></div>
-                                <h3 className="text-2xl font-bold mb-2">{p.ranks[3]?.song}</h3><p className="text-white/70">{p.ranks[3]?.artist}</p>
-                                <div className="mt-6 pt-4 border-t border-white/10 text-sm italic">"{p.ranks[3]?.comment}"</div>
-                            </RevealGuard>
-                         </div>
-                      </FadeIn>
-                      <FadeIn delay={900}>
-                         <div onClick={() => handlePlay(p.ranks[2]?.youtubeUrl)} className={`bg-white text-black p-8 shadow-2xl transform md:translate-y-8 transition-colors relative group ${IS_REVEALED ? 'cursor-pointer hover:bg-gray-100' : ''}`}>
-                            <div className="flex justify-between mb-6"><span className="text-5xl font-black text-gray-200">02</span><span className="text-xs border border-black px-2 py-1 h-fit rounded">SILVER</span></div>
-                            <RevealGuard>
-                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"><Play size={24} fill="black" /></div>
-                                <h3 className="text-2xl font-bold mb-2">{p.ranks[2]?.song}</h3><p className="text-gray-600">{p.ranks[2]?.artist}</p>
-                                <div className="mt-6 pt-4 border-t border-gray-200 text-sm italic">"{p.ranks[2]?.comment}"</div>
-                            </RevealGuard>
-                         </div>
-                      </FadeIn>
-                   </div>
-                </div>
-                <Navigation onNext={nextSlide} onPrev={prevSlide} colorClass="mix-blend-difference text-white" />
-             </SlideContainer>
-          );
-
-          const Interlude = () => (
-             <SlideContainer className="bg-zinc-900 text-white text-center">
-                <FadeIn delay={500}><blockquote className="text-3xl md:text-5xl font-serif italic mb-8">“{appData.interludeQuote.text}”</blockquote></FadeIn>
-                <FadeIn delay={1000}><cite className="text-sm tracking-widest text-gray-400">— {appData.interludeQuote.author}</cite></FadeIn>
-                <Navigation onNext={nextSlide} onPrev={prevSlide} label="PROCEED" />
-             </SlideContainer>
-          );
-
-          const FinalTitle = () => (
-             <SlideContainer className="bg-black text-white text-center">
-                <FadeIn delay={500}><h2 className="text-5xl md:text-8xl font-black mb-4">THE NO.1 PICKS</h2></FadeIn>
-                <FadeIn delay={800}><p className="text-gray-400 tracking-widest">THE DEFINING SOUNDS OF 2025</p></FadeIn>
-                <Navigation onNext={nextSlide} onPrev={prevSlide} label="START" />
-             </SlideContainer>
-          );
-
-          const FinalReveal = ({ p }) => (
-             <SlideContainer className="bg-black text-white text-center relative">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 animate-spin-slow pointer-events-none"><Disc size={600} strokeWidth={0.5} /></div>
-                <div className="z-10 relative w-full max-w-2xl">
-                   <FadeIn delay={200}><div className="mb-8"><span className="bg-white text-black px-4 py-1 text-xs font-bold uppercase tracking-widest">{p.nameEn}'S BEST SONG</span></div></FadeIn>
-                   <FadeIn delay={600}>
-                      <div onClick={() => handlePlay(p.ranks[1]?.youtubeUrl)} className={`border-4 border-white p-8 md:p-16 bg-black transition-transform mb-8 relative group ${IS_REVEALED ? 'cursor-pointer hover:scale-105' : ''}`}>
-                         <RevealGuard placeholder="???">
-                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 z-10"><Play size={64} fill="white" /></div>
-                             <h3 className="text-4xl md:text-6xl font-black mb-4">{p.ranks[1]?.song}</h3>
-                             <p className="text-xl md:text-2xl text-gray-300">{p.ranks[1]?.artist}</p>
-                         </RevealGuard>
-                      </div>
-                   </FadeIn>
-                   <FadeIn delay={1200}>
-                       <RevealGuard placeholder="">
-                           <p className="text-gray-500 font-serif italic">"{p.ranks[1]?.comment}"</p>
-                       </RevealGuard>
-                   </FadeIn>
-                </div>
-                <Navigation onNext={nextSlide} onPrev={prevSlide} />
-             </SlideContainer>
-          );
-
-          const Archive = () => (
-             <SlideContainer className="bg-neutral-900 text-white">
-                <div className="w-full max-w-6xl z-10">
-                   <div className="flex justify-between items-end mb-12 border-b border-gray-700 pb-4"><h2 className="text-3xl font-bold">05. ARCHIVE</h2></div>
-                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {appData.presenters.map(p => Object.values(p.ranks).map((r, i) => {
-                         const videoId = getYouTubeId(r.youtubeUrl);
-                         const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
-                         return (
-                             <div key={`${p.id}-${i}`} onClick={() => handlePlay(r.youtubeUrl)} className={`aspect-square bg-gray-800 relative group border border-gray-700 flex items-center justify-center overflow-hidden ${IS_REVEALED ? 'cursor-pointer' : ''}`}>
-                                <RevealGuard placeholder="LOCKED">
-                                    {thumbnailUrl && (
-                                        <img src={thumbnailUrl} alt={r.song} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-300" />
-                                    )}
-                                    <Play size={48} className="opacity-80 group-hover:opacity-100 text-white z-10 drop-shadow-md" fill="currentColor" />
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 text-center transition-opacity z-20">
-                                       <span className="text-xs text-gray-300 mb-1">SELECTED BY {p.nameEn}</span>
-                                       <p className="font-bold text-lg mb-1">{r.song}</p>
-                                       <p className="text-sm text-gray-300">{r.artist}</p>
-                                    </div>
-                                </RevealGuard>
-                             </div>
-                         );
-                      }))}
-                   </div>
-                   <div className="mt-24 text-center flex justify-center gap-4">
-                      <button onClick={prevSlide} className="border border-white/30 px-8 py-3 hover:bg-white hover:text-black transition-colors uppercase tracking-widest">BACK</button>
-                      <button onClick={() => setCurrentSlide(0)} className="border border-white/30 px-8 py-3 hover:bg-white hover:text-black transition-colors uppercase tracking-widest">REPLAY</button>
-                   </div>
-                </div>
-             </SlideContainer>
-          );
-
-          return (
-             <>
-               <NoiseBackground />
-               <YouTubeModal videoId={playingVideoId} onClose={() => setPlayingVideoId(null)} />
-               {currentSlide === 0 && <Opening />}
-               {currentSlide === 1 && <Manifesto />}
-               {currentSlide === 2 && <Rules />}
-               {currentSlide === 3 && <Reveal32 p={appData.presenters[0]} />}
-               {currentSlide === 4 && <Reveal32 p={appData.presenters[1]} />}
-               {currentSlide === 5 && <Reveal32 p={appData.presenters[2]} />}
-               {currentSlide === 6 && <Interlude />}
-               {currentSlide === 7 && <FinalTitle />}
-               {currentSlide === 8 && <FinalReveal p={appData.presenters[0]} />}
-               {currentSlide === 9 && <FinalReveal p={appData.presenters[1]} />}
-               {currentSlide === 10 && <FinalReveal p={appData.presenters[2]} />}
-               {currentSlide === 11 && <Archive />}
-             </>
-          );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                <div className="max-w-3xl space-y-8 z-1
