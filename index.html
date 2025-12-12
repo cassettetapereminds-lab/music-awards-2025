@@ -45,7 +45,6 @@
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyo0ywsxhTU5Bx4-rkSkc1JjrqJanQ8nRX785UvY-n5RVHCiYoE9X3jMuReDlcGGJlA/exec"; 
 
         // 2. 公開設定 (false: 隠す / true: 公開)
-        // ★ご要望により true (公開状態) に変更しました
         const IS_REVEALED = true; 
 
         // ==========================================
@@ -305,14 +304,13 @@
              </SlideContainer>
           );
 
-          // ★更新箇所★ サムネイル付きBEST SONG発表画面
+          // ★更新箇所★ コメントの色変更
           const FinalReveal = ({ p }) => {
              const videoId = getYouTubeId(p.ranks[1]?.youtubeUrl);
              const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
 
              return (
                  <SlideContainer className="bg-black text-white text-center relative">
-                    {/* 背景装飾 */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 animate-spin-slow pointer-events-none"><Disc size={600} strokeWidth={0.5} /></div>
                     
                     <div className="z-10 relative w-full max-w-2xl">
@@ -325,11 +323,9 @@
                             className={`border-4 border-white p-8 md:p-16 bg-gray-900 transition-transform mb-8 relative group overflow-hidden ${IS_REVEALED ? 'cursor-pointer hover:scale-105' : ''}`}
                           >
                              <RevealGuard placeholder="???">
-                                 {/* サムネイル画像（ある場合） */}
                                  {thumbnailUrl && (
                                      <img src={thumbnailUrl} alt={p.ranks[1]?.song} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
                                  )}
-                                 {/* コンテンツ */}
                                  <div className="relative z-10">
                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"><Play size={64} fill="white" /></div>
                                      <h3 className="text-4xl md:text-6xl font-black mb-4 drop-shadow-lg">{p.ranks[1]?.song}</h3>
@@ -340,7 +336,8 @@
                        </FadeIn>
                        <FadeIn delay={1200}>
                            <RevealGuard placeholder="">
-                               <p className="text-gray-500 font-serif italic">"{p.ranks[1]?.comment}"</p>
+                               {/* 変更箇所: コメントを完全な白にしてドロップシャドウ追加 */}
+                               <p className="text-white font-serif italic text-lg drop-shadow-md">"{p.ranks[1]?.comment}"</p>
                            </RevealGuard>
                        </FadeIn>
                     </div>
